@@ -1,0 +1,57 @@
+FUNCTION_BLOCK deneme	// Block definition (there may be more than one block per file)
+
+VAR_INPUT				// Define input variables
+	disortamsicaklik : REAL;
+	icortamsicaklik : REAL;
+END_VAR
+
+VAR_OUTPUT				// Define output variable
+	klima : REAL;
+END_VAR
+
+FUZZIFY disortamsicaklik			// Fuzzify input variable 'disortamsicaklik': {'sogukyuksek', 'sogukdusuk' , 'sifir' , 'sicakdusuk' , 'sicakyuksek'}
+	TERM sogukyuksek := (-45,1) (-30,1) (-15,0) ; 
+	TERM sogukdusuk := (-30,0) (-15,1) (0,0) ;
+	TERM sifir := (-15,0) (0,1) (15,0);
+	TERM sicakdusuk := (0,0) (15,1) (30,0) ;
+	TERM sicakyuksek := (15,0) (30,1) (45,1);
+END_FUZZIFY
+
+FUZZIFY icortamsicaklik			// Fuzzify input variable 'icortamsicaklik': { 'soguk', 'sýfýr', 'sicak' }
+	TERM sogukic := (-50,1) (-25,1) (0,0) ;
+	TERM sifiric := (-25,0) (0,1) (25,0);
+	TERM sicakic := (0,0) (25,1) (50,1);
+END_FUZZIFY
+
+DEFUZZIFY klima			// Defzzzify output variable 'klima' : {'sicak', 'soguk',}
+	TERM sicak := (0,0) (5,1) (10,0);
+	TERM sifir := (10,0) (15,1) (20,0);
+	TERM soguk := (20,0) (25,1) (30,0);
+	METHOD : COG;		// Use 'Center Of Gravity' defuzzification method
+	DEFAULT := 0;		// Default value is 0 (if no rule activates defuzzifier)
+END_DEFUZZIFY
+
+RULEBLOCK No1
+	AND : MIN;			// Use 'min' for 'and' (also implicit use 'max' for 'or' to fulfill DeMorgan's Law)
+	ACT : MIN;			// Use 'min' activation method
+	ACCU : MAX;			// Use 'max' accumulation method
+
+	RULE 1 : IF disortamsicaklik IS sogukyuksek AND icortamsicaklik IS sogukic THEN klima IS sicak;
+	RULE 2 : IF disortamsicaklik IS sogukdusuk AND icortamsicaklik IS sogukic THEN klima IS sicak;
+	RULE 3 : IF disortamsicaklik IS sifir AND icortamsicaklik IS sogukic THEN klima IS sicak;
+	RULE 4 : IF disortamsicaklik IS sicakdusuk AND icortamsicaklik IS sogukic THEN klima IS sicak;
+	RULE 5 : IF disortamsicaklik IS sicakyuksek AND icortamsicaklik IS sogukic THEN klima IS sicak;
+	RULE 6 : IF disortamsicaklik IS sogukyuksek AND icortamsicaklik IS sifiric THEN klima IS sicak;
+	RULE 7 : IF disortamsicaklik IS sogukdusuk AND icortamsicaklik IS sifiric THEN klima IS sicak;
+	RULE 8 : IF disortamsicaklik IS sifir AND icortamsicaklik IS sifiric THEN klima IS sifir;
+	RULE 9 : IF disortamsicaklik IS sicakdusuk AND icortamsicaklik IS sifiric THEN klima IS soguk;
+	RULE 10: IF disortamsicaklik IS sicakyuksek AND icortamsicaklik IS sifiric THEN klima IS soguk;
+	RULE 11: IF disortamsicaklik IS sogukyuksek AND icortamsicaklik IS sicakic THEN klima IS sifir;
+	RULE 12: IF disortamsicaklik IS sogukdusuk AND icortamsicaklik IS sicakic THEN klima IS sifir;
+	RULE 13: IF disortamsicaklik IS sifir AND icortamsicaklik IS sicakic THEN klima IS sifir;
+	RULE 14: IF disortamsicaklik IS sicakdusuk AND icortamsicaklik IS sicakic THEN klima IS soguk;
+	RULE 15: IF disortamsicaklik IS sicakyuksek AND icortamsicaklik IS sicakic THEN klima IS soguk;
+	 
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
